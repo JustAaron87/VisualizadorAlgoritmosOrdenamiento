@@ -91,7 +91,8 @@
         }
         .active { background-color: #3498db !important; }
         .sorted { background-color: #2ecc71 !important; }
-        
+        .shifting { background-color: #f1c40f !important; }
+
         button {
             padding: 10px 20px;
             cursor: pointer;
@@ -124,6 +125,8 @@
     <button id="btnGenerar" onclick="generarArreglo()">Nuevo Arreglo</button>
     <select id="selectorAlgo" onchange="actualizarPseudocodigo()">
         <option value="bubble">Bubble Sort</option>
+        <option value="selection">Selection Sort</option>
+        <option value="insertion">Insertion Sort</option>
         <option value="nuevo">Nuevo Algoritmo</option>
     </select>
     <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
@@ -194,6 +197,8 @@
 
         const complejidades = {
             bubble: "n^2",
+            selection: "n^2",
+            insertion: "n^2",
             nuevo: "1"
         };
 
@@ -206,6 +211,29 @@
                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;si lista[j] > lista[j+1]",
                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intercambiar(lista[j], lista[j+1])",
                 "&nbsp;&nbsp;fin para",
+                "fin procedimiento"
+            ],
+            selection: [
+                "procedimiento selectionSort(lista)",
+                "&nbsp;&nbsp;n = longitud(lista)",
+                "&nbsp;&nbsp;para i desde 0 hasta n-1:",
+                "&nbsp;&nbsp;&nbsp;&nbsp;min_idx = i",
+                "&nbsp;&nbsp;&nbsp;&nbsp;para j desde i+1 hasta n-1:",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;si lista[j] < lista[min_idx]:",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_idx = j",
+                "&nbsp;&nbsp;&nbsp;&nbsp;intercambiar(lista[i], lista[min_idx])",
+                "fin procedimiento"
+            ],
+            insertion: [
+                "procedimiento insertionSort(lista)",
+                "&nbsp;&nbsp;n = longitud(lista)",
+                "&nbsp;&nbsp;para i desde 1 hasta n-1:",
+                "&nbsp;&nbsp;&nbsp;&nbsp;clave = lista[i]",
+                "&nbsp;&nbsp;&nbsp;&nbsp;j = i - 1",
+                "&nbsp;&nbsp;&nbsp;&nbsp;mientras j >= 0 y lista[j] > clave:",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lista[j + 1] = lista[j]",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j = j - 1",
+                "&nbsp;&nbsp;&nbsp;&nbsp;lista[j + 1] = clave",
                 "fin procedimiento"
             ],
             nuevo: [
@@ -237,16 +265,21 @@
             btnOrdenar.disabled = true;
             selectorAlgo.disabled = true;
             let seleccion = selectorAlgo.value;
+            
             if (seleccion === "bubble") {
                 await bubbleSort();
+            } else if (seleccion === "selection") {
+                await selectionSort();
+            } else if (seleccion === "insertion") {
+                await insertionSort();
             } else if (seleccion === "nuevo") {
                 await nuevoAlgoritmo();
             }
+            
             btnGenerar.disabled = false;
             btnOrdenar.disabled = false;
             selectorAlgo.disabled = false;
         }
-
         async function bubbleSort() {
             const numComparaciones = document.getElementById('numComparaciones');
             const numIntercambios = document.getElementById('numIntercambios');
@@ -297,6 +330,149 @@
                 highlight(6); await sleep(200);
             }
             highlight(7);
+        }
+
+   async function selectionSort() {
+            const numComparaciones = document.getElementById('numComparaciones');
+            const numIntercambios = document.getElementById('numIntercambios');
+            let barras = document.getElementsByClassName('bar');
+            let n = array.length;
+            let contComparaciones = 0;
+            let contIntercambios = 0;
+
+            highlight(1); await sleep(400); 
+
+            for (let i = 0; i < n; i++) {
+                highlight(2); await sleep(400); 
+                let min_idx = i;
+                highlight(3); await sleep(200); 
+                barras[min_idx].classList.add('active'); 
+
+                highlight(4); await sleep(200); 
+                for (let j = i + 1; j < n; j++) {
+                    highlight(5); 
+                    barras[j].classList.add('active');
+                    await sleep(300);
+
+                    contComparaciones++;
+                    numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
+
+                    if (array[j] < array[min_idx]) {
+                        highlight(6); 
+                        barras[min_idx].classList.remove('active');
+                        min_idx = j;
+                        barras[min_idx].classList.add('active');
+                        // Pausa ajustada a 500ms para procesar el cambio del apuntador
+                        await sleep(500); 
+                    } else {
+                        barras[j].classList.remove('active');
+                    }
+                }
+
+                highlight(7); 
+                if (min_idx !== i) {
+                    contIntercambios++;
+                    numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+                    
+                    // 1. Pintar de amarillo las barras que se van a intercambiar
+                    barras[i].classList.add('shifting');
+                    barras[min_idx].classList.add('shifting');
+                    await sleep(400); // Pausa para ver qué elementos cambiarán
+                    
+                    // 2. Realizar el intercambio lógico y visual
+                    let temp = array[i];
+                    array[i] = array[min_idx];
+                    array[min_idx] = temp;
+
+                    barras[i].style.height = `${array[i] * 2.5}px`;
+                    barras[min_idx].style.height = `${array[min_idx] * 2.5}px`;
+                    barras[i].innerHTML = `<span>${array[i]}</span>`;
+                    barras[min_idx].innerHTML = `<span>${array[min_idx]}</span>`;
+                    
+                    await sleep(400); // Pausa para ver el resultado del intercambio aún en amarillo
+
+                    // 3. Quitar el color amarillo
+                    barras[i].classList.remove('shifting');
+                    barras[min_idx].classList.remove('shifting');
+                }
+                
+                barras[min_idx].classList.remove('active');
+                barras[i].classList.add('sorted');
+            }
+            highlight(8); 
+        }
+
+       async function insertionSort() {
+            const numComparaciones = document.getElementById('numComparaciones');
+            const numIntercambios = document.getElementById('numIntercambios');
+            let barras = document.getElementsByClassName('bar');
+            let n = array.length;
+            let contComparaciones = 0;
+            let contIntercambios = 0;
+
+            highlight(1); await sleep(400); 
+            barras[0].classList.add('sorted'); 
+
+            for (let i = 1; i < n; i++) {
+                highlight(2); await sleep(400); 
+                let clave = array[i];
+                highlight(3); await sleep(200); 
+                let j = i - 1;
+                highlight(4); await sleep(200); 
+
+                barras[i].classList.add('active');
+
+                highlight(5); await sleep(300); 
+                while (j >= 0) {
+                    contComparaciones++;
+                    numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
+                    
+                    if(array[j] > clave) {
+                        highlight(6); 
+                        contIntercambios++;
+                        numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+                        
+                        // Pintar de amarillo las barras que se están desplazando
+                        barras[j].classList.add('shifting');
+                        barras[j + 1].classList.add('shifting');
+                        await sleep(400); // Pausa para ver qué elementos van a cambiar
+                        
+                        // Hacer el desplazamiento visual
+                        array[j + 1] = array[j];
+                        barras[j + 1].style.height = `${array[j + 1] * 2.5}px`;
+                        barras[j + 1].innerHTML = `<span>${array[j + 1]}</span>`;
+                        
+                        await sleep(400); // Pausa para ver el resultado del desplazamiento en amarillo
+
+                        // Quitar el amarillo
+                        barras[j].classList.remove('shifting');
+                        barras[j + 1].classList.remove('shifting');
+
+                        highlight(7); await sleep(200); 
+                        j = j - 1;
+                    } else {
+                        break;
+                    }
+                }
+                
+                highlight(8); 
+                // Pintar de amarillo el lugar final donde se inserta la clave
+                barras[j + 1].classList.add('shifting');
+                array[j + 1] = clave;
+                barras[j + 1].style.height = `${clave * 2.5}px`;
+                barras[j + 1].innerHTML = `<span>${clave}</span>`;
+                
+                await sleep(400);
+                
+                barras[j + 1].classList.remove('shifting');
+                barras[i].classList.remove('active');
+
+                // Asegurar que la parte izquierda procesada quede verde
+                for(let k = 0; k <= i; k++){
+                    barras[k].classList.add('sorted');
+                }
+            }
+            highlight(9); 
         }
 
         async function nuevoAlgoritmo() {
