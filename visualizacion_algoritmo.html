@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Visualizador de Ordenamiento</title>
@@ -12,9 +13,35 @@
             flex-direction: column;
             align-items: center;
         }
-        h2 { color: #2c3e50; }
-        .controls { margin-bottom: 20px; }
-        
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            background: #34495e;
+            color: white;
+            font-size: 14px;
+        }
+
+        .speed-control label {
+            margin: 0;
+        }
+
         /* Layout principal */
         #main-wrapper {
             display: flex;
@@ -39,6 +66,7 @@
             flex-direction: column;
             align-items: center;
         }
+
         #container {
             display: flex;
             align-items: flex-end;
@@ -60,14 +88,16 @@
             border-radius: 8px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 14px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
+
         .code-line {
             padding: 2px 8px;
             margin: 2px 0;
             border-radius: 3px;
             transition: all 0.2s;
         }
+
         .highlight {
             background-color: #528bff;
             color: white;
@@ -81,6 +111,7 @@
             background-color: #e74c3c;
             position: relative;
         }
+
         .bar span {
             position: absolute;
             bottom: -15px;
@@ -89,9 +120,18 @@
             font-size: 10px;
             color: #333;
         }
-        .active { background-color: #3498db !important; }
-        .sorted { background-color: #2ecc71 !important; }
-        .shifting { background-color: #f1c40f !important; }
+
+        .active {
+            background-color: #3498db !important;
+        }
+
+        .sorted {
+            background-color: #2ecc71 !important;
+        }
+
+        .shifting {
+            background-color: #f1c40f !important;
+        }
 
         button {
             padding: 10px 20px;
@@ -103,6 +143,7 @@
             color: white;
             transition: 0.3s;
         }
+
         select {
             padding: 10px 20px;
             cursor: pointer;
@@ -112,25 +153,42 @@
             background: #34495e;
             color: white;
         }
-        button:hover { background: #2c3e50; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        select:disabled { background: #ccc; cursor: not-allowed; }
+
+        button:hover {
+            background: #2c3e50;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        select:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
+
 <body>
 
     <h2>Visualizador de Algoritmo</h2>
-    
+
     <div class="controls">
-    <button id="btnGenerar" onclick="generarArreglo()">Nuevo Arreglo</button>
-    <select id="selectorAlgo" onchange="actualizarPseudocodigo()">
-        <option value="bubble">Bubble Sort</option>
-        <option value="selection">Selection Sort</option>
-        <option value="insertion">Insertion Sort</option>
-        <option value="nuevo">Nuevo Algoritmo</option>
-    </select>
-    <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
-</div>
+        <button id="btnGenerar" onclick="generarArreglo()">Nuevo Arreglo</button>
+        <select id="selectorAlgo" onchange="actualizarPseudocodigo()">
+            <option value="bubble">Bubble Sort</option>
+            <option value="selection">Selection Sort</option>
+            <option value="insertion">Insertion Sort</option>
+            <option value="merge">Merge Sort</option>
+            <option value="nuevo">Nuevo Algoritmo</option>
+        </select>
+        <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
+        <div class="speed-control">
+            <label>Velocidad:</label>
+            <input type="range" id="speedSlider" min="0.1" max="5" step="0.1" value="1" oninput="actualizarVelocidad()">
+        </div>
+    </div>
 
     <div id="main-wrapper">
         <div id="left-panel">
@@ -148,6 +206,7 @@
 
     <script>
         const container = document.getElementById('container');
+        let multiplicadorVelocidad = 1;
         let array = [];
 
         // Genera barras aleatorias
@@ -190,15 +249,21 @@
             numComparaciones.innerHTML = "Total de Comparaciones: 0";
             numIntercambios.innerHTML = "Total de Intercambios: 0";
             generarArreglo();
+            btnOrdenar.disabled = false;
+        }
+
+        function actualizarVelocidad() {
+            multiplicadorVelocidad = document.getElementById('speedSlider').value;
         }
 
         // Función para pausar la ejecución
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms / multiplicadorVelocidad));
 
         const complejidades = {
             bubble: "n^2",
             selection: "n^2",
             insertion: "n^2",
+            merge: "nlgn",
             nuevo: "1"
         };
 
@@ -236,6 +301,30 @@
                 "&nbsp;&nbsp;&nbsp;&nbsp;lista[j + 1] = clave",
                 "fin procedimiento"
             ],
+            merge: [
+                "procedimiento mergeSort(lista)",
+                "&nbsp;&nbsp;n = longitud(lista)",
+                "&nbsp;&nbsp;si n <= 1",
+                "&nbsp;&nbsp;&nbsp;&nbsp;regresar lista",
+                "&nbsp;&nbsp;medio = n / 2",
+                "&nbsp;&nbsp;mitad_izquierda = mergeSort(lista[0 hasta medio])",
+                "&nbsp;&nbsp;midad_derecha = mergeSort(lista[medio hasta final])",
+                "&nbsp;&nbsp;regresar merge(mitad_izquierda, mitad_derecha)",
+                "fin procedimiento",
+                "",
+                "procedimiento merge(izquierda, derecha)",
+                "&nbsp;&nbsp;resultado = lista vacía;",
+                "&nbsp;&nbsp;mientras izquierda y derecha no esten vacias",
+                "&nbsp;&nbsp;&nbsp;&nbsp;si izquierda[0] <= derecha[0]",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;agregar izquierda[0] a resultado",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eliminar primer elemento de izquierda",
+                "&nbsp;&nbsp;&nbsp;&nbsp;si no",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;agregar derecha[0] a resultado",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eliminar primer elemento de derecha",
+                "&nbsp;&nbsp;agregar elementos restantes de izquierda a resultado",
+                "&nbsp;&nbsp;agregar elementos restantes de derecha a resultado",
+                "&nbsp;&nbsp;regresar resultado"
+            ],
             nuevo: [
                 "procedimiento nuevoAlgoritmo(lista)",
                 "&nbsp;&nbsp;// Tu lógica aquí",
@@ -265,21 +354,23 @@
             btnOrdenar.disabled = true;
             selectorAlgo.disabled = true;
             let seleccion = selectorAlgo.value;
-            
+
             if (seleccion === "bubble") {
                 await bubbleSort();
             } else if (seleccion === "selection") {
                 await selectionSort();
             } else if (seleccion === "insertion") {
                 await insertionSort();
+            } else if (seleccion == "merge") {
+                await mergeSort();
             } else if (seleccion === "nuevo") {
                 await nuevoAlgoritmo();
             }
-            
+
             btnGenerar.disabled = false;
-            btnOrdenar.disabled = false;
             selectorAlgo.disabled = false;
         }
+
         async function bubbleSort() {
             const numComparaciones = document.getElementById('numComparaciones');
             const numIntercambios = document.getElementById('numIntercambios');
@@ -296,7 +387,7 @@
                     highlight(3);
                     // Resaltar las barras que se están comparando
                     barras[j].classList.add('active');
-                    barras[j+1].classList.add('active');
+                    barras[j + 1].classList.add('active');
                     await sleep(300);
 
                     highlight(4);
@@ -308,22 +399,30 @@
                         highlight(5);
                         contIntercambios++;
                         numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+
+                        barras[j].classList.add('shifting');
+                        barras[j + 1].classList.add('shifting');
+                        await sleep(400);
+
                         // Intercambiar valores en el arreglo
                         let temp = array[j];
                         array[j] = array[j + 1];
                         array[j + 1] = temp;
-                        
+
                         // Intercambiar altura visual
                         barras[j].style.height = `${array[j] * 2.5}px`;
-                        barras[j+1].style.height = `${array[j+1] * 2.5}px`;
+                        barras[j + 1].style.height = `${array[j + 1] * 2.5}px`;
                         barras[j].innerHTML = `<span>${array[j]}</span>`;
-                        barras[j+1].innerHTML = `<span>${array[j+1]}</span>`;
+                        barras[j + 1].innerHTML = `<span>${array[j + 1]}</span>`;
                         await sleep(400);
+
+                        barras[j].classList.remove('shifting');
+                        barras[j + 1].classList.remove('shifting');
                     }
 
                     // Quitar el color rojo
                     barras[j].classList.remove('active');
-                    barras[j+1].classList.remove('active');
+                    barras[j + 1].classList.remove('active');
                 }
                 // Marcar en verde la barra que ya quedó ordenada
                 barras[n - i - 1].classList.add('sorted');
@@ -332,7 +431,7 @@
             highlight(7);
         }
 
-   async function selectionSort() {
+        async function selectionSort() {
             const numComparaciones = document.getElementById('numComparaciones');
             const numIntercambios = document.getElementById('numIntercambios');
             let barras = document.getElementsByClassName('bar');
@@ -340,17 +439,17 @@
             let contComparaciones = 0;
             let contIntercambios = 0;
 
-            highlight(1); await sleep(400); 
+            highlight(1); await sleep(400);
 
             for (let i = 0; i < n; i++) {
-                highlight(2); await sleep(400); 
+                highlight(2); await sleep(400);
                 let min_idx = i;
-                highlight(3); await sleep(200); 
-                barras[min_idx].classList.add('active'); 
+                highlight(3); await sleep(200);
+                barras[min_idx].classList.add('active');
 
-                highlight(4); await sleep(200); 
+                highlight(4); await sleep(200);
                 for (let j = i + 1; j < n; j++) {
-                    highlight(5); 
+                    highlight(5);
                     barras[j].classList.add('active');
                     await sleep(300);
 
@@ -358,27 +457,27 @@
                     numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
 
                     if (array[j] < array[min_idx]) {
-                        highlight(6); 
+                        highlight(6);
                         barras[min_idx].classList.remove('active');
                         min_idx = j;
                         barras[min_idx].classList.add('active');
                         // Pausa ajustada a 500ms para procesar el cambio del apuntador
-                        await sleep(500); 
+                        await sleep(500);
                     } else {
                         barras[j].classList.remove('active');
                     }
                 }
 
-                highlight(7); 
+                highlight(7);
                 if (min_idx !== i) {
                     contIntercambios++;
                     numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
-                    
+
                     // 1. Pintar de amarillo las barras que se van a intercambiar
                     barras[i].classList.add('shifting');
                     barras[min_idx].classList.add('shifting');
                     await sleep(400); // Pausa para ver qué elementos cambiarán
-                    
+
                     // 2. Realizar el intercambio lógico y visual
                     let temp = array[i];
                     array[i] = array[min_idx];
@@ -388,21 +487,21 @@
                     barras[min_idx].style.height = `${array[min_idx] * 2.5}px`;
                     barras[i].innerHTML = `<span>${array[i]}</span>`;
                     barras[min_idx].innerHTML = `<span>${array[min_idx]}</span>`;
-                    
+
                     await sleep(400); // Pausa para ver el resultado del intercambio aún en amarillo
 
                     // 3. Quitar el color amarillo
                     barras[i].classList.remove('shifting');
                     barras[min_idx].classList.remove('shifting');
                 }
-                
+
                 barras[min_idx].classList.remove('active');
                 barras[i].classList.add('sorted');
             }
-            highlight(8); 
+            highlight(8);
         }
 
-       async function insertionSort() {
+        async function insertionSort() {
             const numComparaciones = document.getElementById('numComparaciones');
             const numIntercambios = document.getElementById('numIntercambios');
             let barras = document.getElementsByClassName('bar');
@@ -410,69 +509,177 @@
             let contComparaciones = 0;
             let contIntercambios = 0;
 
-            highlight(1); await sleep(400); 
-            barras[0].classList.add('sorted'); 
+            highlight(1); await sleep(400);
 
             for (let i = 1; i < n; i++) {
-                highlight(2); await sleep(400); 
+                highlight(2); await sleep(400);
                 let clave = array[i];
-                highlight(3); await sleep(200); 
+                highlight(3); await sleep(200);
                 let j = i - 1;
-                highlight(4); await sleep(200); 
+                highlight(4); await sleep(200);
 
                 barras[i].classList.add('active');
 
-                highlight(5); await sleep(300); 
+                highlight(5); await sleep(300);
                 while (j >= 0) {
                     contComparaciones++;
                     numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
-                    
-                    if(array[j] > clave) {
-                        highlight(6); 
+
+                    if (array[j] > clave) {
+                        highlight(6);
                         contIntercambios++;
                         numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
-                        
+
                         // Pintar de amarillo las barras que se están desplazando
                         barras[j].classList.add('shifting');
                         barras[j + 1].classList.add('shifting');
                         await sleep(400); // Pausa para ver qué elementos van a cambiar
-                        
+
                         // Hacer el desplazamiento visual
                         array[j + 1] = array[j];
                         barras[j + 1].style.height = `${array[j + 1] * 2.5}px`;
                         barras[j + 1].innerHTML = `<span>${array[j + 1]}</span>`;
-                        
+
                         await sleep(400); // Pausa para ver el resultado del desplazamiento en amarillo
 
                         // Quitar el amarillo
                         barras[j].classList.remove('shifting');
                         barras[j + 1].classList.remove('shifting');
 
-                        highlight(7); await sleep(200); 
+                        highlight(7); await sleep(200);
                         j = j - 1;
                     } else {
                         break;
                     }
                 }
-                
-                highlight(8); 
+
+                highlight(8);
                 // Pintar de amarillo el lugar final donde se inserta la clave
                 barras[j + 1].classList.add('shifting');
                 array[j + 1] = clave;
                 barras[j + 1].style.height = `${clave * 2.5}px`;
                 barras[j + 1].innerHTML = `<span>${clave}</span>`;
-                
+
                 await sleep(400);
-                
+
                 barras[j + 1].classList.remove('shifting');
                 barras[i].classList.remove('active');
+            }
+            highlight(9);
 
-                // Asegurar que la parte izquierda procesada quede verde
-                for(let k = 0; k <= i; k++){
-                    barras[k].classList.add('sorted');
+            // Pintar todo de verde al terminar
+            for (let x = 0; x < barras.length; x++) {
+                barras[x].classList.add('sorted');
+                await sleep(50);
+            }
+        }
+        async function mergeSort() {
+            const numComparaciones = document.getElementById('numComparaciones');
+            const numIntercambios = document.getElementById('numIntercambios');
+            let barras = document.getElementsByClassName('bar');
+
+            let contComparaciones = 0;
+            let contIntercambios = 0;
+
+            // Función auxiliar para combinar (Merge)
+            async function merge(inicio, medio, fin) {
+                let izquierda = array.slice(inicio, medio + 1);
+                let derecha = array.slice(medio + 1, fin + 1);
+                let i = 0, j = 0, k = inicio;
+
+                highlight(12); await sleep(300);
+                while (i < izquierda.length && j < derecha.length) {
+                    let indiceIzq = inicio + i;
+                    let indiceDer = medio + 1 + j;
+                    // Colorear barras activas
+                    barras[indiceIzq].classList.add('active');
+                    barras[indiceDer].classList.add('active');
+                    await sleep(200);
+
+                    contComparaciones++;
+                    numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
+
+                    highlight(13); await sleep(300);
+                    if (izquierda[i] <= derecha[j]) {
+                        highlight(14); await sleep(200);
+                        array[k] = izquierda[i];
+                        i++;
+                    } else {
+                        highlight(17); await sleep(200);
+                        array[k] = derecha[j];
+                        j++;
+                    }
+
+                    // Actualizar visualmente la barra modificada
+                    barras[k].classList.add('shifting');
+                    barras[k].style.height = `${array[k] * 2.5}px`;
+                    barras[k].innerHTML = `<span>${array[k]}</span>`;
+                    contIntercambios++;
+                    numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+
+                    await sleep(400);
+                    barras[k].classList.remove('shifting');
+
+                    // Limpiar colores
+                    if (barras[indiceIzq]) barras[indiceIzq].classList.remove('active');
+                    if (barras[indiceDer]) barras[indiceDer].classList.remove('active');
+
+                    k++;
+                }
+
+                highlight(19); await sleep(300);
+                while (i < izquierda.length) {
+                    barras[k].classList.add('shifting');
+                    array[k] = izquierda[i];
+                    barras[k].style.height = `${array[k] * 2.5}px`;
+                    barras[k].innerHTML = `<span>${array[k]}</span>`;
+                    contIntercambios++;
+                    numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+                    await sleep(100);
+                    barras[k].classList.remove('shifting');
+                    i++; k++;
+                }
+
+                highlight(20); await sleep(300);
+                while (j < derecha.length) {
+                    barras[k].classList.add('shifting');
+                    array[k] = derecha[j];
+                    barras[k].style.height = `${array[k] * 2.5}px`;
+                    barras[k].innerHTML = `<span>${array[k]}</span>`;
+                    contIntercambios++;
+                    numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+                    await sleep(200);
+                    barras[k].classList.remove('shifting');
+                    j++; k++;
                 }
             }
-            highlight(9); 
+
+            // Función recursiva principal
+            async function mergeSortHelper(inicio, fin) {
+                if (inicio >= fin) {
+                    return;
+                }
+
+                let medio = Math.floor((inicio + fin) / 2);
+
+                highlight(5); await sleep(300);
+                await mergeSortHelper(inicio, medio);
+
+                highlight(6); await sleep(300);
+                await mergeSortHelper(medio + 1, fin);
+
+                highlight(7); await sleep(300);
+                await merge(inicio, medio, fin);
+            }
+
+            // Iniciar el ordenamiento
+            await mergeSortHelper(0, array.length - 1);
+
+            // Pintar todo de verde al terminar
+            for (let x = 0; x < barras.length; x++) {
+                barras[x].classList.add('sorted');
+                await sleep(50);
+            }
         }
 
         async function nuevoAlgoritmo() {
@@ -486,6 +693,8 @@
         // Generar un arreglo inicial al cargar la página
         generarArreglo();
         actualizarPseudocodigo();
+        actualizarVelocidad();
     </script>
 </body>
+
 </html>
