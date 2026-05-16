@@ -181,6 +181,7 @@
             <option value="selection">Selection Sort</option>
             <option value="insertion">Insertion Sort</option>
             <option value="merge">Merge Sort</option>
+            <option value="bogo">Stupid Sort</option>
             <option value="nuevo">Nuevo Algoritmo</option>
         </select>
         <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
@@ -214,14 +215,16 @@
             container.innerHTML = '';
             array = [];
             resetHighlight();
-            for (let i = 0; i < 15; i++) {
+            while (array.length < 15) {
                 let valor = Math.floor(Math.random() * 90) + 10;
-                array.push(valor);
-                let barra = document.createElement('div');
-                barra.classList.add('bar');
-                barra.style.height = `${valor * 2.5}px`;
-                barra.innerHTML = `<span>${valor}</span>`;
-                container.appendChild(barra);
+                if (!array.includes(valor)) {
+                    array.push(valor);
+                    let barra = document.createElement('div');
+                    barra.classList.add('bar');
+                    barra.style.height = `${valor * 2.5}px`;
+                    barra.innerHTML = `<span>${valor}</span>`;
+                    container.appendChild(barra);
+                }
             }
         }
 
@@ -263,7 +266,8 @@
             bubble: "n^2",
             selection: "n^2",
             insertion: "n^2",
-            merge: "nlgn",
+            merge: "n*lgn",
+            bogo: "n*n!",
             nuevo: "1"
         };
 
@@ -325,6 +329,12 @@
                 "&nbsp;&nbsp;agregar elementos restantes de derecha a resultado",
                 "&nbsp;&nbsp;regresar resultado"
             ],
+            bogo: [
+                "procedimiento stupidSort(lista)",
+                "&nbsp;&nbsp;mientras lista no esté ordenada",
+                "&nbsp;&nbsp;&nbsp;&nbsp;mezclar lista",
+                "fin procedimiento"
+            ],
             nuevo: [
                 "procedimiento nuevoAlgoritmo(lista)",
                 "&nbsp;&nbsp;// Tu lógica aquí",
@@ -363,6 +373,8 @@
                 await insertionSort();
             } else if (seleccion == "merge") {
                 await mergeSort();
+            } else if (seleccion === "bogo") {
+                await bogoSort();
             } else if (seleccion === "nuevo") {
                 await nuevoAlgoritmo();
             }
@@ -676,6 +688,50 @@
             await mergeSortHelper(0, array.length - 1);
 
             // Pintar todo de verde al terminar
+            for (let x = 0; x < barras.length; x++) {
+                barras[x].classList.add('sorted');
+                await sleep(50);
+            }
+        }
+
+        async function bogoSort() {
+            const numComparaciones = document.getElementById('numComparaciones');
+            const numIntercambios = document.getElementById('numIntercambios');
+            let barras = document.getElementsByClassName('bar');
+
+            let contComparaciones = 0;
+            let contIntercambios = 0;
+
+            function sorted() {
+                for (let i = 0; i < barras.length - 1; i++) {
+                    contComparaciones++;
+                    numComparaciones.innerHTML = `Total de Comparaciones: ${contComparaciones}`;
+                    if (array[i] > array[i + 1]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            async function shuffle() {
+                for (let i = barras.length - 1; i > 0; i--) {
+                    contIntercambios++;
+                    numIntercambios.innerHTML = `Total de Intercambios: ${contIntercambios}`;
+                    let j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                    barras[j].style.height = `${array[j] * 2.5}px`;
+                    barras[i].style.height = `${array[i] * 2.5}px`;
+                    barras[j].innerHTML = `<span>${array[j]}</span>`;
+                    barras[i].innerHTML = `<span>${array[i]}</span>`;
+                }
+            }
+
+            while (!sorted()) {
+                highlight(1); await sleep(200);
+                await shuffle();
+                highlight(2); await sleep(200);
+            }
+
             for (let x = 0; x < barras.length; x++) {
                 barras[x].classList.add('sorted');
                 await sleep(50);
