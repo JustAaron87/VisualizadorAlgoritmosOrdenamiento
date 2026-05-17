@@ -182,6 +182,7 @@
             <option value="insertion">Insertion Sort</option>
             <option value="merge">Merge Sort</option>
             <option value="bogo">Stupid Sort</option>
+            <option value="quick">Quick Sort</option>
             <option value="nuevo">Nuevo Algoritmo</option>
         </select>
         <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
@@ -267,6 +268,7 @@
             selection: "n^2",
             insertion: "n^2",
             merge: "n*lgn",
+            quick: "n*lgn",
             bogo: "n*n!",
             nuevo: "1"
         };
@@ -335,6 +337,24 @@
                 "&nbsp;&nbsp;&nbsp;&nbsp;mezclar lista",
                 "fin procedimiento"
             ],
+            quick: [
+                "procedimiento quickSort(lista, bajo, alto)",
+                "&nbsp;&nbsp;si bajo < alto",
+                "&nbsp;&nbsp;&nbsp;&nbsp;pi = partition(lista, bajo, alto)",
+                "&nbsp;&nbsp;&nbsp;&nbsp;quickSort(lista, bajo, pi - 1)",
+                "&nbsp;&nbsp;&nbsp;&nbsp;quickSort(lista, pi + 1, alto)",
+                "fin procedimiento",
+                "",
+                "procedimiento partition(lista, bajo, alto)",
+                "&nbsp;&nbsp;pivote = lista[alto]",
+                "&nbsp;&nbsp;i = bajo - 1",
+                "&nbsp;&nbsp;para j desde bajo hasta alto - 1",
+                "&nbsp;&nbsp;&nbsp;&nbsp;si lista[j] < pivote",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intercambiar(lista[i], lista[j])",
+                "&nbsp;&nbsp;intercambiar(lista[i+1], lista[alto])",
+                "&nbsp;&nbsp;regresar i + 1"
+            ],
             nuevo: [
                 "procedimiento nuevoAlgoritmo(lista)",
                 "&nbsp;&nbsp;// Tu lógica aquí",
@@ -375,6 +395,8 @@
                 await mergeSort();
             } else if (seleccion === "bogo") {
                 await bogoSort();
+            } else if (seleccion === "quick") {
+                await quickSort();
             } else if (seleccion === "nuevo") {
                 await nuevoAlgoritmo();
             }
@@ -693,7 +715,135 @@
                 await sleep(50);
             }
         }
-
+        async function quickSort() {
+            const numComparaciones = document.getElementById('numComparaciones');
+            const numIntercambios = document.getElementById('numIntercambios');
+        
+            let barras = document.getElementsByClassName('bar');
+        
+            let contComparaciones = 0;
+            let contIntercambios = 0;
+        
+            async function partition(bajo, alto) {
+        
+                highlight(8);
+                let pivote = array[alto];
+        
+                barras[alto].classList.add('active');
+        
+                highlight(9);
+                let i = bajo - 1;
+        
+                highlight(10);
+        
+                for (let j = bajo; j < alto; j++) {
+        
+                    barras[j].classList.add('active');
+        
+                    contComparaciones++;
+                    numComparaciones.innerHTML =
+                        `Total de Comparaciones: ${contComparaciones}`;
+        
+                    await sleep(300);
+        
+                    highlight(11);
+        
+                    if (array[j] < pivote) {
+        
+                        highlight(12);
+        
+                        i++;
+        
+                        highlight(13);
+        
+                        contIntercambios++;
+                        numIntercambios.innerHTML =
+                            `Total de Intercambios: ${contIntercambios}`;
+        
+                        barras[i].classList.add('shifting');
+                        barras[j].classList.add('shifting');
+        
+                        await sleep(400);
+        
+                        [array[i], array[j]] = [array[j], array[i]];
+        
+                        barras[i].style.height = `${array[i] * 2.5}px`;
+                        barras[j].style.height = `${array[j] * 2.5}px`;
+        
+                        barras[i].innerHTML = `<span>${array[i]}</span>`;
+                        barras[j].innerHTML = `<span>${array[j]}</span>`;
+        
+                        await sleep(400);
+        
+                        barras[i].classList.remove('shifting');
+                        barras[j].classList.remove('shifting');
+                    }
+        
+                    barras[j].classList.remove('active');
+                }
+        
+                highlight(14);
+        
+                contIntercambios++;
+                numIntercambios.innerHTML =
+                    `Total de Intercambios: ${contIntercambios}`;
+        
+                barras[i + 1].classList.add('shifting');
+                barras[alto].classList.add('shifting');
+        
+                await sleep(400);
+        
+                [array[i + 1], array[alto]] =
+                    [array[alto], array[i + 1]];
+        
+                barras[i + 1].style.height =
+                    `${array[i + 1] * 2.5}px`;
+        
+                barras[alto].style.height =
+                    `${array[alto] * 2.5}px`;
+        
+                barras[i + 1].innerHTML =
+                    `<span>${array[i + 1]}</span>`;
+        
+                barras[alto].innerHTML =
+                    `<span>${array[alto]}</span>`;
+        
+                await sleep(400);
+        
+                barras[i + 1].classList.remove('shifting');
+                barras[alto].classList.remove('shifting');
+                barras[alto].classList.remove('active');
+        
+                return i + 1;
+            }
+        
+            async function quickSortHelper(bajo, alto) {
+        
+                highlight(1);
+        
+                if (bajo < alto) {
+        
+                    highlight(2);
+        
+                    let pi = await partition(bajo, alto);
+        
+                    highlight(3);
+                    await quickSortHelper(bajo, pi - 1);
+        
+                    highlight(4);
+                    await quickSortHelper(pi + 1, alto);
+                }
+            }
+        
+            await quickSortHelper(0, array.length - 1);
+        
+            for (let i = 0; i < barras.length; i++) {
+                barras[i].classList.add('sorted');
+                await sleep(50);
+            }
+        
+            highlight(5);
+        }
         async function bogoSort() {
             const numComparaciones = document.getElementById('numComparaciones');
             const numIntercambios = document.getElementById('numIntercambios');
