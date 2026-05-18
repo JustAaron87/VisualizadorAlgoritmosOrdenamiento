@@ -181,8 +181,8 @@
             <option value="selection">Selection Sort</option>
             <option value="insertion">Insertion Sort</option>
             <option value="merge">Merge Sort</option>
-            <option value="bogo">Stupid Sort</option>
             <option value="quick">Quick Sort</option>
+            <option value="bogo">Stupid Sort</option>
         </select>
         <button id="btnOrdenar" onclick="iniciarOrdenamiento()">Ordenar</button>
         <div class="speed-control">
@@ -699,6 +699,8 @@
 
             // Iniciar el ordenamiento
             await mergeSortHelper(0, array.length - 1);
+
+            highlight(8);
 
             // Pintar todo de verde al terminar
             for (let x = 0; x < barras.length; x++) {
